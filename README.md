@@ -17,3 +17,7 @@ textboxobj.keyReleased();
 
 Examples :
 Look in examples folder to see how to use openGUI.
+
+23.08.2014 :
+Added font and text size to all controls. You can set them via methods setFont(PFont) and setTextSize(int).
+Added themes, you can change them using method setTheme(int).
