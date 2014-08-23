@@ -1,16 +1,7 @@
 //openGUI free GUI library for Processing. Licensed under General Public License (GPL), created by George Bochev on 30 Jan 2014.
 //Notes : you must add void keyReleased() to your main code, and then put there all textbox object's function keyReleased();
-//colors
-color BUTTON_CLICKED_COLOR = #026DBC;
-color BUTTON_MOUSEOVER_COLOR = #007FDE;
-color BUTTON_DEFAULT_COLOR = #034271;
-color BUTTON_TEXT_COLOR = #FFFFFF;
-color LABEL_TEXT_COLOR = #CBCBCB;
-color TEXTBOX_COLOR = #026DBC;
-color TEXTBOX_STROKE_COLOR = #007FDE;
-color TEXTBOX_TEXT_COLOR = #FFFFFF;
-//classes
-class button 
+
+class Button 
 {
   String text="";  
   int pos_x;
@@ -19,15 +10,33 @@ class button
   int w=20;
   boolean value=false;
   boolean visible=true;
-  button(int pos_x, int pos_y, int w, int h)
+  PFont font;
+  Theme th;
+  int themeId = 0;
+  int textSize = 12;
+  Button(int pos_x, int pos_y, int w, int h)
   {
     this.pos_x=pos_x;
     this.pos_y=pos_y;
     this.h=h;
     this.w=w;
+    th = new Theme(themeId);
+  }
+  void setTheme(int id)
+  {
+    this.themeId = id;
+    th.setTheme(themeId);
   }
   void setText(String text) {
     this.text=text;
+  }
+  void setFont(PFont font)
+  {
+    this.font = font;
+  }
+  void setTextSize(int txtSize)
+  {
+    this.textSize = txtSize;
   }
   boolean clicked() {
     if (mouseX>pos_x && mouseX<pos_x+w && mouseY>pos_y && mouseY<pos_y+h && mousePressed==true) {   
@@ -37,7 +46,8 @@ class button
     return false;
   }
   boolean mouseover() {
-    if (mouseX>pos_x && mouseX<pos_x+w && mouseY>pos_y && mouseY<pos_y+h) {
+    if (mouseX>pos_x && mouseX<pos_x+w && mouseY>pos_y && mouseY<pos_y+h) 
+    {
       return true;
     }
     return false;
@@ -46,60 +56,109 @@ class button
   {
     if (visible)
     {
-      if (this.clicked()) fill(BUTTON_CLICKED_COLOR); // return true and set value to true
-      else if (this.mouseover()) fill(BUTTON_MOUSEOVER_COLOR); // return true and set color if mouseover
-      else fill(BUTTON_DEFAULT_COLOR); //if there is no event sets to default color
+      if (this.clicked()) fill(th.BUTTON_CLICKED_COLOR); // return true and set value to true
+      else if (this.mouseover()) fill(th.BUTTON_MOUSEOVER_COLOR); // return true and set color if mouseover
+      else fill(th.BUTTON_DEFAULT_COLOR); //if there is no event sets to default color
       noStroke();
       rect(pos_x, pos_y, w, h);
-      fill(BUTTON_TEXT_COLOR);
+      fill(th.BUTTON_TEXT_COLOR);
+      if (font != null && textSize > 0)
+        textFont(this.font, textSize);
+      if (textSize > 0)
+        textSize(this.textSize);
       text(text, pos_x+5, pos_y+14);
     }
   }
 }
 
-class label
+class Label
 {
   String text="";
-  int pos_x;
-  int pos_y;
+  int pos_x = 0;
+  int pos_y = 0;
   boolean visible=true;
-  label(String text, int pos_x, int pos_y)
+  PFont font;
+  int textSize = 12;
+  Theme th;
+  int themeId = 0;
+  Label(String text, int pos_x, int pos_y)
   {
     this.text=text;
     this.pos_x=pos_x;
     this.pos_y=pos_y;
+    th = new Theme(themeId);
+  }
+    void setTheme(int id)
+  {
+    this.themeId = id;
+    th.setTheme(themeId);
   }
   void setText(String text)
   {
     this.text=text;
   }
+  void setFont(PFont font)
+  {
+    this.font = font;
+  }
+  void setTextSize(int txtSize)
+  {
+    this.textSize = txtSize;
+  }
+  void setLocation(int pos_x, int pos_y)
+  {
+    this.pos_x = pos_x;
+    this.pos_y = pos_y;
+  }
   void draw()
   {
     if (visible)
     {
-      fill(LABEL_TEXT_COLOR);
+      fill(th.LABEL_TEXT_COLOR);
+      if (this.font!=null && textSize>0)
+        textFont(this.font, textSize);
+      if (textSize>0)
+        textSize(textSize);
       text(text, pos_x, pos_y);
     }
   }
 }
-class textbox
+class Textbox
 {
   String text="";
   int pos_x;
   int pos_y;
   int h=20;
   int w=40;
+  PFont font;
+  int textSize = 12;
   boolean visible=true;
   boolean edit=false;
-  textbox(int pos_x, int pos_y, int w)
+  Theme th;
+  int themeId = 0;
+  Textbox(int pos_x, int pos_y, int w)
   {
     this.pos_x=pos_x;
     this.pos_y=pos_y;
     this.w=w;
+    th =new Theme(themeId);
+  }
+    void setTheme(int id)
+  {
+    this.themeId = id;
+    th.setTheme(themeId);
   }
   void setText(String text)
   {
     this.text=text;
+  }
+  void setTextSize(int txtSize)
+  {
+    this.textSize = txtSize;
+  }
+  void setFont(PFont font)
+  {
+    this.font = font;
   }
   boolean clicked()
   {
@@ -115,7 +174,7 @@ class textbox
   {
     if (edit)
     {
-      if (key!=ENTER && key!=BACKSPACE && key!=CODED)
+      if (key!=ENTER && key!=BACKSPACE && key!=CODED && text.length()*8<w)
         text+=key;
       if (keyCode==BACKSPACE && text.length()>0) text = text.substring( 0, text.length()-1 ); 
       if (key==ENTER)edit=false;
@@ -124,11 +183,21 @@ class textbox
   void draw()
   {
     this.clicked();
-    if (!edit)noStroke();
-    else stroke(TEXTBOX_STROKE_COLOR);
-    fill(TEXTBOX_COLOR);
+    if (!edit) stroke(th.TEXTBOX_STROKE_COLOR);
+    else stroke(th.TEXTBOX_STROKE_HL_COLOR);
+    fill(th.TEXTBOX_COLOR);
     rect(pos_x, pos_y, w, h);
-    fill(TEXTBOX_TEXT_COLOR);
+    fill(th.TEXTBOX_TEXT_COLOR);
+//    if(edit)
+//    {
+//    int s = second();
+//    if(s%2 == 0)
+//    line(text.length()*5+pos_x+5,pos_y+h-2,text.length()*5+pos_x+5,pos_y+2); 
+//    }
+    if (this.font!=null && textSize>0)
+      textFont(this.font, textSize);
+    if (textSize>0)
+      textSize(textSize);
     text(text, pos_x+5, pos_y+14);
   }
 }
